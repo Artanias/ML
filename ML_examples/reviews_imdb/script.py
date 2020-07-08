@@ -1,3 +1,5 @@
+import requests
+import tarfile
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_files
@@ -6,6 +8,22 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import GridSearchCV
+
+
+def download_data():
+    f = open(r'./aclImdb_v1.tar.gz', 'wb')
+    link = 'http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'
+    ufr = requests.get(link)
+    f.write(ufr.content)
+    f.close()
+    print('download done')
+
+
+def extract_data():
+    tar_arch = tarfile.open('./aclImdb_v1.tar.gz')
+    tar_arch.extractall('./')
+    tar_arch.close()
+    print('extract done')
 
 
 def prepare_data():
@@ -93,6 +111,8 @@ def plot_histogramm(Accuracy):
 
 
 if __name__ == '__main__':
+    download_data()
+    extract_data()
     Accuracy = []
     text_train, y_train, text_test, y_test = prepare_data()
     X_train, X_test = preprocess_data(text_train, text_test)
