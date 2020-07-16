@@ -34,6 +34,7 @@ path_labels_test = "./Pickles/labels_test.pickle"
 with open(path_labels_test, 'rb') as data:
     labels_test = pickle.load(data)
 
+# Dimension of feature
 print(features_train.shape)
 print(features_test.shape)
 
