@@ -1,11 +1,9 @@
 import pickle
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import svm
 from pprint import pprint
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import ShuffleSplit
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -40,7 +38,7 @@ with open(path_labels_test, 'rb') as data:
 print(features_train.shape)
 print(features_test.shape)
 
-svc_0 =svm.SVC(random_state=8)
+svc_0 = svm.SVC(random_state=8)
 
 print('Parameters currently in use:\n')
 pprint(svc_0.get_params())
@@ -62,11 +60,10 @@ probability = [True]
 
 # Create the random grid
 random_grid = {'C': C,
-              'kernel': kernel,
-              'gamma': gamma,
-              'degree': degree,
-              'probability': probability
-             }
+               'kernel': kernel,
+               'gamma': gamma,
+               'degree': degree,
+               'probability': probability}
 
 pprint(random_grid)
 
@@ -78,8 +75,8 @@ random_search = RandomizedSearchCV(estimator=svc,
                                    param_distributions=random_grid,
                                    n_iter=50,
                                    scoring='accuracy',
-                                   cv=3, 
-                                   verbose=1, 
+                                   cv=3,
+                                   verbose=1,
                                    random_state=8)
 
 # Fit the random search model
@@ -91,26 +88,27 @@ print("")
 print("The mean accuracy of a model with these hyperparameters is:")
 print(random_search.best_score_)
 
-# Create the parameter grid based on the results of random search 
+# Create the parameter grid based on the results of random search
 C = [.0001, .001, .01, .1]
 degree = [3, 4, 5]
 gamma = [1, 10, 100]
 probability = [True]
 
 param_grid = [
-  {'C': C, 'kernel':['linear'], 'probability':probability},
-  {'C': C, 'kernel':['poly'], 'degree':degree, 'probability':probability},
-  {'C': C, 'kernel':['rbf'], 'gamma':gamma, 'probability':probability}
+  {'C': C, 'kernel': ['linear'], 'probability':probability},
+  {'C': C, 'kernel': ['poly'], 'degree':degree, 'probability':probability},
+  {'C': C, 'kernel': ['rbf'], 'gamma':gamma, 'probability':probability}
 ]
 
 # Create a base model
 svc = svm.SVC(random_state=8)
 
-# Manually create the splits in CV in order to be able to fix a random_state (GridSearchCV doesn't have that argument)
-cv_sets = ShuffleSplit(n_splits = 3, test_size = .33, random_state = 8)
+# Manually create the splits in CV in order to be able to fix a random_state
+# (GridSearchCV doesn't have that argument)
+cv_sets = ShuffleSplit(n_splits=3, test_size=.33, random_state=8)
 
 # Instantiate the grid search model
-grid_search = GridSearchCV(estimator=svc, 
+grid_search = GridSearchCV(estimator=svc,
                            param_grid=param_grid,
                            scoring='accuracy',
                            cv=cv_sets,
@@ -138,12 +136,15 @@ print(accuracy_score(labels_train, best_svc.predict(features_train)))
 print("The test accuracy is: ")
 print(accuracy_score(labels_test, svc_pred))
 
-aux_df = df[['Category', 'Category_Code']].drop_duplicates().sort_values('Category_Code')
+aux_df = df[[
+             'Category',
+             'Category_Code'
+           ]].drop_duplicates().sort_values('Category_Code')
 conf_matrix = confusion_matrix(labels_test, svc_pred)
-plt.figure(figsize=(12.8,6))
-sns.heatmap(conf_matrix, 
+plt.figure(figsize=(12.8, 6))
+sns.heatmap(conf_matrix,
             annot=True,
-            xticklabels=aux_df['Category'].values, 
+            xticklabels=aux_df['Category'].values,
             yticklabels=aux_df['Category'].values,
             cmap="Blues")
 plt.ylabel('Predicted')
@@ -152,9 +153,10 @@ plt.title('Confusion matrix')
 plt.savefig('./Grafics/confusion_matrixSVM.png')
 plt.show()
 
+temp_score = accuracy_score(labels_train, best_svc.predict(features_train))
 d = {
      'Model': 'SVM',
-     'Training Set Accuracy': accuracy_score(labels_train, best_svc.predict(features_train)),
+     'Training Set Accuracy': temp_score,
      'Test Set Accuracy': accuracy_score(labels_test, svc_pred)
 }
 
@@ -163,8 +165,6 @@ print(df_models_svc)
 
 with open('Models/best_svc.pickle', 'wb') as output:
     pickle.dump(best_svc, output)
-    
+
 with open('Models/df_models_svc.pickle', 'wb') as output:
     pickle.dump(df_models_svc, output)
-
-
